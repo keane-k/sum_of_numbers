@@ -49,8 +49,9 @@ int main() // setting this up just to avoid error line from plaguing the screen
 
 /* Q2 workings*/
 /* Let's figure out how to find the first and last digit of this text */
-std::string line = "a2b4c9d";
+
 /*
+std::string line = "a2b4c9d";
 int main()
 {
     int first = -1; // to hold the first digit we find, `-1` is a placeholder 
@@ -199,7 +200,9 @@ int main()
    - This would require two parallel lists --> one for the words, one for their values
    - And then we loop through them checking each one with `.compare()`. */
 
+// DEPRECATED: THIS VERSION DOESN'T DISTINGUISH BETWEEN lowercase & UPPERCASE CHARS, UPDATED VERSION FOUND BELOW....
 // this <decoder()> will take an input string, and an index i; it'll be put up against our digit and number-word detector
+/*
 int decoder(const std::string& s, size_t i) // don't worry about `const` and `&`, 
                                             // just know it means "s is the string that got passed in, and this function
                                             // won't modify your original."
@@ -235,7 +238,7 @@ int decoder(const std::string& s, size_t i) // don't worry about `const` and `&`
     // If nothing is matched then return -1
     return -1;
 }
-
+*/
 
 // main() is where we will parse the string, call the decoder() func and print the result we want to see
 /*
@@ -256,8 +259,8 @@ int main()
 /* Now that we have decoder(), let's return back to our very first starting point of putting the 2 numbers together
    using `first = -1` and `last = -1`, but this time round, values return from decoder() will be used.
    How the workflow looks like:
-   text --> line_value() which calls to decoder() --> text gets processed by decoder() --> spits out value for line_value() to take */
-
+   text --> line_value() which calls decoder() --> text gets processed by decoder() --> spits out value for line_value() to take */
+/*
 int line_value(const std::string& line)
 {
     int first = -1; // to hold the first digit
@@ -284,6 +287,7 @@ int line_value(const std::string& line)
     // combine first(TENS-DIGIT) and last(ONES-DIGIT) together to become the FULL number
     return first * 10 + last;
 }
+*/
 /*
 int main()
 {
@@ -375,7 +379,7 @@ int main()
    - it'll add all the decoded numbers together - refer to Building Block 1 
 */
 
-
+/*
 int sum_of_words(const std::string& file_name)
 {
     std::ifstream in(file_name); // set input file
@@ -389,17 +393,192 @@ int sum_of_words(const std::string& file_name)
         total += line_value(line);
 
         // print some results
+        std::cout << line << "\n";
         std::cout << "After adding = " << line_value(line) << ", total = " << total << "\n";
     }
 
     return total; // rmbr to return the total summation value
 }
+*/
 
+// run sum_of_words()
+/*
 int main()
 {
-    std::string filename = "input.txt";
+    std::string filename = "example.txt";
     
     return sum_of_words(filename);
+}
+*/
+
+/* However in "example.txt", it contains uppercase characters that we have not accounted for, 
+   thus "Two1four3" gives "13" instead of the expected "23".
+   This problem stems from decoder() lacking this feature, let us fix this. */
 
 
+/* Building block: `std::tolower('string_to_lowercase')`
+   - Note: use 'string' instead of "string", else there'll be errors
+   - takes one character and returns its lowercase version, if char is already lowercase (or isn't a letter at all), char remains unchanged */
+/*
+int main()
+{
+    std::cout << (char)std::tolower('S') << "\n";   // returns 's'
+    std::cout << (char)std::tolower('s') << "\n";   // returns 's' (unchanged)
+    std::cout << (char)std::tolower('7') << "\n";   // returns '7' (unchanged)
+}
+*/
+
+
+/* Building block: parsing strings into `std::tolower('string')` to become lowercase, compare the result to an initialized lowercased word */
+/*
+int main()
+{
+    std::string s = "Sixeighttwo1";
+    std::string word = "six";
+
+    size_t i = 0; // check starting at index 0, to be used with <s> to determine the starting index
+
+    bool word_matches = true;
+
+    // create <for> loop, we'll use <k> here to determine how much char to be lowercased in <s> 
+    // and then determine if <s[index]> matches with <word[index]>
+    for (size_t k = 0; k < word.size(); k++)
+    {
+        if (std::tolower(s[i + k]) != word[k]) // <if> condition - if char_lowercased doesn't matches with the char from word[k]
+                                               // we just break contact since there's no point checking further
+        {
+            word_matches = false;
+            break;
+        }
+    }
+
+    std::cout << "does \"" << s << "\" starting at index " << i << " match \"" << word << "\" (case-insensitive)? ";
+    std::cout << (word_matches ? "yes" : "no") << "\n";
+    // prints (does "Sixeighttwo1" starting at index 0 match "six" (case-insensitive)? yes)
+
+    return 0;
+}
+*/
+
+
+/* Apply this new feature to decoder() */
+
+int decoder(const std::string& s, size_t i) // don't worry about `const` and `&`, 
+                                            // just know it means "s is the string that got passed in, and this function
+                                            // won't modify your original."
+                                            // <size_t i> is the index from the `main()` function, keep this in mind
+{
+    // First check, if the char at position i is a plain-digit ('7'), rmbr to '7' - '0'
+    if(std::isdigit(s[i])) // OPTIONAL: rmbr `static_cast<unsigned char>(line[i])` prevents crash on certain non-English text
+    {
+        int d = s[i] - '0'; // tl;dr - this is how you turn a DIGIT CHARACTER into DIGIT NUMBER
+        return d; 
+    }
+
+
+    // Otherwise,
+    // Second check, check every spelled-out word to see if it starts exactly at position i
+    std::vector<std::string> words = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
+    
+    // Mirror your {words} with the respective numerical_values
+    std::vector<int> numerical_values = {1,2,3,4,5,6,7,8,9};
+
+    // Create a for loop that loops through `words` and use `.compare()`, if `.compare()` is TRUE, return the numerical_value
+    // --> How to use `.compare()`?
+    // ----> list.compare(starting_index, how_many_chars_to_compare(len), what_to_compare_against)
+    for (size_t k = 0; k < words.size(); k++)
+    {
+        const std::string& word = words[k];
+
+        if (i + word.size() > s.size()) // conduct guard check in the event `word` would run past the end of `s`
+        {
+            continue; // skip this word, move on to the next word
+        }
+
+        bool word_matches = true; // set TRUE initially, if word from `word` and `s` do not match, we'll set to FALSE
+        for (size_t j = 0; j < word.size(); j++)
+        {
+            if (std::tolower(s[i + j]) != word[j]) // In python: if s.lowercase() not equal to word[j], break contact since there's no point checking further
+            {
+                word_matches = false;
+                break;
+            }
+        }
+
+        
+        // But if the word_matches remains TRUE, return the numerical value
+        if (word_matches)
+        {
+            return numerical_values[k];
+        }
+    }
+
+    // If nothing is matched then return -1
+    return -1;
+}
+
+int line_value(const std::string& line)
+{
+    int first = -1; // to hold the first digit
+    int last = -1; // to hold the last digit
+
+    for (size_t i = 0; i < line.size(); i++)
+    {
+        // we no longer need the <if> statement here to check "if digit or not" since decode() returns numbers
+        // we also no longer need to do the whole <'7' - '0'> thing since decode() is returning int numbers
+        int d = decoder(line, i);
+
+        // do the SENTINEL check to determine if decoder() spits out a number or -1, if no, we process further
+        if (d != -1)
+        {
+            // do SENTINEL check to determine if this is the first number to be processed or not, if yes, let `first` take this number
+            if (first == -1) first = d;
+            last = d;
+        }
+    }
+
+    if (first == -1) return 0; // if the line has no numbers in it at all (our database all have numbers)
+                               // This is just a safeguard against a crash should both `first` and `last` be `-1`, we won't catch the final compuation of `-11`
+    
+    // combine first(TENS-DIGIT) and last(ONES-DIGIT) together to become the FULL number
+    return first * 10 + last;
+}
+
+int sum_of_words(const std::string& file_name)
+{
+    std::ifstream in(file_name); // set input file
+    std ::string line; // initialise an empty string for callback later
+
+    int total = 0; // captures the total sum of all the numbers
+
+    while(std::getline(in, line))
+    {
+        // call line_value() since it returns numerical values, decoder() is already called within line_value() 
+        total += line_value(line);
+
+        // print each line for manual inspection, the decoded value will be shown for you to double-check
+        // std::cout << line << "\n";
+        // std::cout << "After adding = " << line_value(line) << ", total = " << total << "\n";
+    }
+
+    return total; // rmbr to return the total summation value
+}
+
+// re-run sum_of_words() with updated decoder() func to cater for uppercase characters in example.txt
+int main()
+{
+    // Check against the given example
+    {
+        std::string given_example = "example.txt";
+        std::cout << "Given Example (expects 183): " << sum_of_words(given_example) << "\n";
+    }
+
+    // Check against the real input text file "input.txt"
+    {
+    std::string real_input = "input.txt";
+    std::cout << "input.txt total: " << sum_of_words(real_input) << "\n";
+    }
+
+    return 0;
+    
 }
