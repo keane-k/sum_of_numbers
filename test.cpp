@@ -288,12 +288,17 @@ int line_value(const std::string& line)
 int main()
 {
     std::string line = "eightwo1";
+    std::string line2 = "Fouruyguyguyfive5";
+    std::string line3 = "Sixeighttwo1";
+    std::string line4 = "Fivesevensixeight23";
 
     // lets run some test, call the line_value() func, no need to parse the string or choose any index
-    std::cout << line_value(line);
+    std::cout << line_value(line) << "\n";
+    std::cout << line_value(line2) << "\n";
+    std::cout << line_value(line3) << "\n";
+    std::cout << line_value(line4) << "\n";
     
     return 0;
-
 }
 */
 
@@ -337,6 +342,7 @@ int main()
    `std::getline(input_file, place_to_store_text)`  --> pulls one line out of the file at a time and tells you, via its return value, 
                                                         whether it actually found a line or hit the end of the file (EOF) */
 
+/*
 int main()
 {
     std::ifstream in("example.txt"); // path to file; program and file needs to exist in the same folder for this to work
@@ -344,7 +350,7 @@ int main()
 
     while (std::getline(in, line)) // reads as "keep looping as long as `getline()` successfully reads another line"
                                    // `getline()` returns something that behaves like TRUE - if there's still a line to read, or FALSE - the moment it hits the end of the file
-                                   // 
+                                   // You don't need to (1) check `.size()` or (2) count lines yourself - the stream will tell you when it's done.
     {
         std::cout << "Read a line: " << line << "\n";
     }
@@ -353,6 +359,7 @@ int main()
     std::cout << "No more lines -- End of File" << "\n";
     return 0;
 }
+*/
 
 /* Main takeaway from this:
    `std::ifstream any_name("file_name.txt")` --> ("input file stream") opens a file for reading.
@@ -360,3 +367,39 @@ int main()
                                                                            via its return value, 
                                                                            whether it actually found a line or hit the end of the file (EOF)
 */
+
+
+/* Combine everything we've built thus far to form the function `sum_of_words()`*/
+/* sum_of_words() will take the filename as input arg 
+   - it'll read the the file using the given "file_name" - refer to Building Block 2 
+   - it'll add all the decoded numbers together - refer to Building Block 1 
+*/
+
+
+int sum_of_words(const std::string& file_name)
+{
+    std::ifstream in(file_name); // set input file
+    std ::string line; // initialise an empty string for callback later
+
+    int total = 0; // captures the total sum of all the numbers
+
+    while(std::getline(in, line))
+    {
+        // call line_value() since it returns numerical values, decoder() is already called within line_value() 
+        total += line_value(line);
+
+        // print some results
+        std::cout << "After adding = " << line_value(line) << ", total = " << total << "\n";
+    }
+
+    return total; // rmbr to return the total summation value
+}
+
+int main()
+{
+    std::string filename = "input.txt";
+    
+    return sum_of_words(filename);
+
+
+}
